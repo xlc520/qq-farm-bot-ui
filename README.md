@@ -2,10 +2,6 @@
 
 基于 Node.js 的 QQ 农场自动化工具，支持多账号管理、Web 控制面板、实时日志与数据分析。
 
-新 qq农场游戏交流群：1077372084
-
-[Discord](https://discord.gg/suya45TU)
-
 ## 技术栈
 
 **后端**
@@ -148,6 +144,35 @@ environment:
 ```
 
 修改后执行 `docker compose up -d` 重启生效。
+
+### 使用预构建镜像
+
+本仓库通过 GitHub Actions 自动构建并推送镜像到 GitHub Container Registry。
+
+```bash
+# 拉取镜像（将 <user/repo> 替换为实际仓库地址）
+docker pull ghcr.io/xlc520/qq-farm-bot-ui:latest
+
+# 运行容器
+docker run -d \
+  --name qq-farm-bot \
+  -p 3000:3000 \
+  -v ./data:/app/core/data \
+  -e ADMIN_PASSWORD=你的强密码 \
+  ghcr.io/xlc520/qq-farm-bot-ui:latest
+
+# 查看日志
+docker logs -f qq-farm-bot
+```
+
+**可选参数说明**
+
+| 参数 | 说明 |
+|------|------|
+| `-p 3000:3000` | 端口映射，格式为 `宿主机端口:容器端口` |
+| `-v ./data:/app/core/data` | 数据持久化，账号与配置保存在 `./data` |
+| `-e ADMIN_PASSWORD=xxx` | 设置管理密码（默认 `admin`） |
+| `-e TZ=Asia/Shanghai` | 时区设置（镜像已默认配置） |
 
 ---
 

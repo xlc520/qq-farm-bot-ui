@@ -8,6 +8,11 @@ on:
     tags:
       - "*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "自定义镜像版本号（例如 1.0）"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -39,6 +44,7 @@ jobs:
             type=raw,value=latest
             type=sha
             type=ref,event=tag
+            type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != '' }}
 
       - name: 构建并推送镜像
         uses: docker/build-push-action@v6
