@@ -120,7 +120,7 @@ const localSettings = ref({
   preferredSeedId: 0,
   bagSeedPriority: [] as number[],
   intervals: { farmMin: 2, farmMax: 2, friendMin: 10, friendMax: 10 },
-  friendBlockLevel: { enabled: true, Level: 1},
+  friendBlockLevel: { enabled: true, Level: 1 },
   friendQuietHours: { enabled: false, start: '23:00', end: '07:00' },
   automation: {
     farm: false,
@@ -416,7 +416,7 @@ const localQrLogin = ref({
 
 const localRuntimeClient = ref({
   serverUrl: 'wss://gate-obt.nqf.qq.com/prod/ws',
-  clientVersion: '1.6.2.18_20260227',
+  clientVersion: '1.7.0.6_20260313',
   os: 'iOS',
   device_info: {
     sys_software: 'iOS 26.2.1',
@@ -630,6 +630,162 @@ const reloginUrlModeOptions = [
   { label: '二维码', value: 'qr_code' },
   { label: '二维码 + 链接', value: 'all' },
 ]
+
+const runtimeClientPresetMap = {
+  iOS: {
+    systemVersions: [
+      'iOS 15.8.4',
+      'iOS 16.6.1',
+      'iOS 16.7.10',
+      'iOS 17.5.1',
+      'iOS 17.6.1',
+      'iOS 17.7.2',
+      'iOS 18.0',
+      'iOS 18.1.1',
+      'iOS 18.2',
+      'iOS 18.3.1',
+      'iOS 18.3.2',
+      'iOS 18.4',
+      'iOS 26.2.1',
+    ],
+    networks: ['wifi', '5g', '4g'],
+    memories: ['4096', '6144', '7672', '8192'],
+    deviceIds: [
+      'iPhone X<iPhone18,3>',
+      'iPhone XR<iPhone11,8>',
+      'iPhone XS<iPhone11,2>',
+      'iPhone XS Max<iPhone11,6>',
+      'iPhone 11<iPhone12,1>',
+      'iPhone 11 Pro<iPhone12,3>',
+      'iPhone 11 Pro Max<iPhone12,5>',
+      'iPhone 12<iPhone13,2>',
+      'iPhone 12 mini<iPhone13,1>',
+      'iPhone 12 Pro<iPhone13,3>',
+      'iPhone 12 Pro Max<iPhone13,4>',
+      'iPhone 13 mini<iPhone14,4>',
+      'iPhone 13<iPhone14,5>',
+      'iPhone 13 Pro<iPhone14,2>',
+      'iPhone 13 Pro Max<iPhone14,3>',
+      'iPhone SE 3<iPhone14,6>',
+      'iPhone 14 Plus<iPhone14,8>',
+      'iPhone 14<iPhone15,4>',
+      'iPhone 14 Pro<iPhone15,2>',
+      'iPhone 14 Pro Max<iPhone15,3>',
+      'iPhone 15 Plus<iPhone15,5>',
+      'iPhone 15<iPhone16,2>',
+      'iPhone 15 Pro<iPhone16,1>',
+      'iPhone 15 Pro Max<iPhone16,2>',
+      'iPhone 16<iPhone17,3>',
+      'iPhone 16 Plus<iPhone17,4>',
+      'iPhone 16 Pro<iPhone17,1>',
+      'iPhone 16 Pro Max<iPhone17,2>',
+    ],
+    defaults: {
+      clientVersion: '1.7.0.6_20260313',
+      sys_software: 'iOS 26.2.1',
+      network: 'wifi',
+      memory: '7672',
+      device_id: 'iPhone X<iPhone18,3>',
+    },
+  },
+  Android: {
+    systemVersions: [
+      'Android 10',
+      'Android 11',
+      'Android 12',
+      'Android 12L',
+      'Android 13',
+      'Android 14',
+      'Android 15',
+      'MIUI 14 / Android 13',
+      'HyperOS 1 / Android 14',
+      'One UI 6.1 / Android 14',
+      'ColorOS 14 / Android 14',
+      'OriginOS 4 / Android 14',
+    ],
+    networks: ['wifi', '5g', '4g'],
+    memories: ['4096', '6144', '8192', '12288'],
+    deviceIds: [
+      'Samsung S23<SM-S911B>',
+      'Samsung S23 Ultra<SM-S9180>',
+      'Samsung S24<SM-S921B>',
+      'Samsung S24 Ultra<SM-S9280>',
+      'Pixel 7<GQML3>',
+      'Pixel 8<shiba>',
+      'Pixel 8 Pro<husky>',
+      'Pixel 9 Pro<caiman>',
+      'Xiaomi 13<2211133C>',
+      'Xiaomi 14<23127PN0CC>',
+      'Xiaomi 14 Pro<23116PN5BC>',
+      'Xiaomi 15<24129PN74C>',
+      'Redmi K70<2311DRK48C>',
+      'Redmi K70 Pro<23117RK66C>',
+      'OnePlus 11<PHB110>',
+      'OnePlus 12<PJD110>',
+      'OnePlus Ace 3<PGJM10>',
+      'vivo X100<V2309A>',
+      'vivo X100 Pro<V2324A>',
+      'iQOO 12<V2307A>',
+      'OPPO Find X7<PHZ110>',
+      'OPPO Find X7 Ultra<PHY110>',
+      'HUAWEI P60<ADY-AL00>',
+      'HUAWEI Mate 60<ALN-AL00>',
+      'HONOR Magic6<BDY-AN00>',
+    ],
+    defaults: {
+      clientVersion: '1.7.0.6_20260313',
+      sys_software: 'Android 14',
+      network: 'wifi',
+      memory: '8192',
+      device_id: 'Xiaomi 14<23127PN0CC>',
+    },
+  },
+} as const
+
+const runtimeOsOptions = Object.keys(runtimeClientPresetMap).map(os => ({ label: os, value: os }))
+
+function toRuntimeOptions(values: readonly string[], currentValue: string) {
+  const options = values.map(value => ({ label: value, value }))
+  const current = String(currentValue || '').trim()
+  if (!current || options.some(option => option.value === current))
+    return options
+  return [{ label: `${current} (当前值)`, value: current }, ...options]
+}
+
+const currentRuntimePreset = computed(() => {
+  const os = String(localRuntimeClient.value.os || 'iOS')
+  return runtimeClientPresetMap[os as keyof typeof runtimeClientPresetMap] || runtimeClientPresetMap.iOS
+})
+
+const runtimeSystemVersionOptions = computed(() =>
+  toRuntimeOptions(currentRuntimePreset.value.systemVersions, String(localRuntimeClient.value.device_info.sys_software || '')),
+)
+
+const runtimeNetworkOptions = computed(() =>
+  toRuntimeOptions(currentRuntimePreset.value.networks, String(localRuntimeClient.value.device_info.network || '')),
+)
+
+const runtimeMemoryOptions = computed(() =>
+  toRuntimeOptions(currentRuntimePreset.value.memories, String(localRuntimeClient.value.device_info.memory || '')),
+)
+
+const runtimeDeviceIdOptions = computed(() =>
+  toRuntimeOptions(currentRuntimePreset.value.deviceIds, String(localRuntimeClient.value.device_info.device_id || '')),
+)
+
+function handleRuntimeOsChange(value: string | number) {
+  const os = String(value || 'iOS')
+  const preset = runtimeClientPresetMap[os as keyof typeof runtimeClientPresetMap]
+  if (!preset)
+    return
+
+  localRuntimeClient.value.os = os
+  localRuntimeClient.value.clientVersion = preset.defaults.clientVersion
+  localRuntimeClient.value.device_info.sys_software = preset.defaults.sys_software
+  localRuntimeClient.value.device_info.network = preset.defaults.network
+  localRuntimeClient.value.device_info.memory = preset.defaults.memory
+  localRuntimeClient.value.device_info.device_id = preset.defaults.device_id
+}
 
 const currentChannelDocUrl = computed(() => {
   const key = String(localOffline.value.channel || '').trim().toLowerCase()
@@ -994,7 +1150,7 @@ async function handleTestOffline() {
       <p>加载中...</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 mt-12 gap-4 text-sm lg:grid-cols-2">
+    <div v-else class="grid grid-cols-1 gap-4 text-sm lg:grid-cols-2">
       <!-- Card 1: Strategy & Automation -->
       <div v-if="currentAccountId" class="card h-full flex flex-col rounded-lg bg-white shadow dark:bg-gray-800">
         <!-- Strategy Header -->
@@ -1010,149 +1166,185 @@ async function handleTestOffline() {
 
         <!-- Strategy Content -->
         <div class="p-4 space-y-3">
-            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <BaseSelect v-model="localSettings.plantingStrategy"
-                            label="种植策略"
-                            :options="plantingStrategyOptions" />
-                <BaseSelect v-if="localSettings.plantingStrategy === 'preferred'"
-                            v-model="localSettings.preferredSeedId"
-                            label="优先种植种子"
-                            :options="preferredSeedOptions" />
-                <!-- 预览区域：与 BaseSelect 同结构同样式，避免切换策略时布局跳动 -->
-                <div v-else-if="localSettings.plantingStrategy !== 'bag_priority'" class="flex flex-col gap-1.5">
-                    <label class="text-sm text-gray-700 font-medium dark:text-gray-300">策略选种预览</label>
-                    <div class="w-full flex items-center justify-between border border-gray-200 rounded-lg bg-gray-50 px-3 py-2 text-gray-500 dark:border-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
-                        <span class="truncate">{{ strategyPreviewLabel ?? '加载中...' }}</span>
-                        <div class="i-carbon-chevron-down shrink-0 text-lg text-gray-400" />
-                    </div>
-                </div>
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <BaseSelect
+              v-model="localSettings.plantingStrategy"
+              label="种植策略"
+              :options="plantingStrategyOptions"
+            />
+            <BaseSelect
+              v-if="localSettings.plantingStrategy === 'preferred'"
+              v-model="localSettings.preferredSeedId"
+              label="优先种植种子"
+              :options="preferredSeedOptions"
+            />
+            <!-- 预览区域：与 BaseSelect 同结构同样式，避免切换策略时布局跳动 -->
+            <div v-else-if="localSettings.plantingStrategy !== 'bag_priority'" class="flex flex-col gap-1.5">
+              <label class="text-sm text-gray-700 font-medium dark:text-gray-300">策略选种预览</label>
+              <div class="w-full flex items-center justify-between border border-gray-200 rounded-lg bg-gray-50 px-3 py-2 text-gray-500 dark:border-gray-600 dark:bg-gray-800/50 dark:text-gray-400">
+                <span class="truncate">{{ strategyPreviewLabel ?? '加载中...' }}</span>
+                <div class="i-carbon-chevron-down shrink-0 text-lg text-gray-400" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 背包种子优先级列表 -->
+          <div v-if="localSettings.plantingStrategy === 'bag_priority'" class="mt-3">
+            <div class="mb-2 flex items-center justify-between">
+              <label class="text-sm text-gray-700 font-medium dark:text-gray-300">背包种子优先级</label>
+              <div class="flex items-center gap-2">
+                <button
+                  class="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600"
+                  @click="fetchBagSeeds"
+                >
+                  刷新
+                </button>
+                <button
+                  class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-600"
+                  @click="resetBagSeedPriority"
+                >
+                  重置排序
+                </button>
+              </div>
             </div>
 
-            <!-- 背包种子优先级列表 -->
-            <div v-if="localSettings.plantingStrategy === 'bag_priority'" class="mt-3">
-                <div class="mb-2 flex items-center justify-between">
-                    <label class="text-sm text-gray-700 font-medium dark:text-gray-300">背包种子优先级</label>
-                    <div class="flex items-center gap-2">
-                        <button class="text-xs text-blue-500 dark:text-blue-400 hover:text-blue-600"
-                                @click="fetchBagSeeds">
-                            刷新
-                        </button>
-                        <button class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-600"
-                                @click="resetBagSeedPriority">
-                            重置排序
-                        </button>
-                    </div>
-                </div>
-
-                <div v-if="bagSeedsLoading" class="py-4 text-center text-gray-500">
-                    加载中...
-                </div>
-                <div v-else-if="sortedBagSeeds.length === 0" class="py-4 text-center text-gray-500 dark:text-gray-400">
-                    背包中暂无种子
-                </div>
-                <div v-else class="max-h-64 overflow-y-auto space-y-1">
-                    <div v-for="(seed, index) in sortedBagSeeds"
-                         :key="seed.seedId"
-                         draggable="true"
-                         class="flex cursor-grab select-none items-center gap-3 border border-gray-200 rounded-lg bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-800/50"
-                         @dragstart="onDragStart($event, index)"
-                         @dragover="onDragOver"
-                         @drop="onDrop(index)"
-                         @dragend="onDragEnd">
-                        <div class="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                            <div class="i-carbon-draggable text-lg" />
-                            <span class="w-5 text-center text-sm font-medium">{{ index + 1 }}</span>
-                        </div>
-                        <img v-if="seed.image"
-                             :src="seed.image"
-                             :alt="seed.name"
-                             class="pointer-events-none h-8 w-8 object-contain">
-                        <div v-else class="pointer-events-none h-8 w-8 rounded bg-gray-200 dark:bg-gray-700" />
-                        <div class="pointer-events-none min-w-0 flex-1">
-                            <div class="flex items-center gap-2">
-                                <span v-if="seed.requiredLevel >= 200"
-                                      class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400">活动</span>
-                                <span class="truncate text-sm text-gray-800 font-medium dark:text-gray-200">{{ seed.name }}</span>
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">
-                                数量: {{ seed.count }} | {{ seed.requiredLevel >= 200 ? '活动种子' : `${seed.requiredLevel}级` }}
-                                <span v-if="seed.plantSize > 1"> | {{ seed.plantSize }}x{{ seed.plantSize }}</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <button class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 dark:hover:text-gray-300"
-                                    :disabled="index === 0"
-                                    @click.stop="moveSeedUp(index)">
-                                <div class="i-carbon-chevron-up" />
-                            </button>
-                            <button class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 dark:hover:text-gray-300"
-                                    :disabled="index === sortedBagSeeds.length - 1"
-                                    @click.stop="moveSeedDown(index)">
-                                <div class="i-carbon-chevron-down" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-2 text-xs text-gray-500 space-y-1 dark:text-gray-400">
-                    <p>* 拖拽或点击箭头调整种植优先级</p>
-                    <p>* 仅支持 1x1 种子，2x2 及以上种子会被跳过</p>
-                    <p>* 1x1 种子用完后将自动切换为"最高等级"策略</p>
-                </div>
+            <div v-if="bagSeedsLoading" class="py-4 text-center text-gray-500">
+              加载中...
             </div>
-
-            <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
-                <BaseInput v-model.number="localSettings.intervals.farmMin"
-                           label="农场巡查最小 (秒)"
-                           type="number"
-                           min="1"
-                           max="86400" />
-                <BaseInput v-model.number="localSettings.intervals.farmMax"
-                           label="农场巡查最大 (秒)"
-                           type="number"
-                           min="1"
-                           max="86400" />
-                <BaseInput v-model.number="localSettings.intervals.friendMin"
-                           label="好友巡查最小 (秒)"
-                           type="number"
-                           min="1"
-                           max="86400" />
-                <BaseInput v-model.number="localSettings.intervals.friendMax"
-                           label="好友巡查最大 (秒)"
-                           type="number"
-                           min="1"
-                           max="86400" />
+            <div v-else-if="sortedBagSeeds.length === 0" class="py-4 text-center text-gray-500 dark:text-gray-400">
+              背包中暂无种子
             </div>
-
-            <div class="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 dark:border-gray-700">
-                <div class="flex items-center gap-2">
-                    <BaseSwitch v-model="localSettings.friendBlockLevel.enabled"
-                                label="启用屏蔽好友等级" />
-                    <BaseInput v-model="localSettings.friendBlockLevel.Level"
-                               type="number"
-                               min="1"
-                               max="999"
-                               step="1"
-                               required
-                               class="w-24"
-                               :disabled="!localSettings.friendBlockLevel.enabled" />
+            <div v-else class="max-h-64 overflow-y-auto space-y-1">
+              <div
+                v-for="(seed, index) in sortedBagSeeds"
+                :key="seed.seedId"
+                draggable="true"
+                class="flex cursor-grab select-none items-center gap-3 border border-gray-200 rounded-lg bg-gray-50 p-2 dark:border-gray-600 dark:bg-gray-800/50"
+                @dragstart="onDragStart($event, index)"
+                @dragover="onDragOver"
+                @drop="onDrop(index)"
+                @dragend="onDragEnd"
+              >
+                <div class="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+                  <div class="i-carbon-draggable text-lg" />
+                  <span class="w-5 text-center text-sm font-medium">{{ index + 1 }}</span>
                 </div>
-            </div>
-
-            <div class="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 dark:border-gray-700">
-                <BaseSwitch v-model="localSettings.friendQuietHours.enabled"
-                            label="启用静默时段" />
-                <div class="flex items-center gap-2">
-                    <BaseInput v-model="localSettings.friendQuietHours.start"
-                               type="time"
-                               class="w-24"
-                               :disabled="!localSettings.friendQuietHours.enabled" />
-                    <span class="text-gray-500">-</span>
-                    <BaseInput v-model="localSettings.friendQuietHours.end"
-                               type="time"
-                               class="w-24"
-                               :disabled="!localSettings.friendQuietHours.enabled" />
+                <img
+                  v-if="seed.image"
+                  :src="seed.image"
+                  :alt="seed.name"
+                  class="pointer-events-none h-8 w-8 object-contain"
+                >
+                <div v-else class="pointer-events-none h-8 w-8 rounded bg-gray-200 dark:bg-gray-700" />
+                <div class="pointer-events-none min-w-0 flex-1">
+                  <div class="flex items-center gap-2">
+                    <span
+                      v-if="seed.requiredLevel >= 200"
+                      class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-400"
+                    >活动</span>
+                    <span class="truncate text-sm text-gray-800 font-medium dark:text-gray-200">{{ seed.name }}</span>
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-gray-400">
+                    数量: {{ seed.count }} | {{ seed.requiredLevel >= 200 ? '活动种子' : `${seed.requiredLevel}级` }}
+                    <span v-if="seed.plantSize > 1"> | {{ seed.plantSize }}x{{ seed.plantSize }}</span>
+                  </div>
                 </div>
+                <div class="flex flex-col gap-1">
+                  <button
+                    class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 dark:hover:text-gray-300"
+                    :disabled="index === 0"
+                    @click.stop="moveSeedUp(index)"
+                  >
+                    <div class="i-carbon-chevron-up" />
+                  </button>
+                  <button
+                    class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30 dark:hover:text-gray-300"
+                    :disabled="index === sortedBagSeeds.length - 1"
+                    @click.stop="moveSeedDown(index)"
+                  >
+                    <div class="i-carbon-chevron-down" />
+                  </button>
+                </div>
+              </div>
             </div>
+            <div class="mt-2 text-xs text-gray-500 space-y-1 dark:text-gray-400">
+              <p>* 拖拽或点击箭头调整种植优先级</p>
+              <p>* 仅支持 1x1 种子，2x2 及以上种子会被跳过</p>
+              <p>* 1x1 种子用完后将自动切换为"最高等级"策略</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <BaseInput
+              v-model.number="localSettings.intervals.farmMin"
+              label="农场巡查最小 (秒)"
+              type="number"
+              min="1"
+              max="86400"
+            />
+            <BaseInput
+              v-model.number="localSettings.intervals.farmMax"
+              label="农场巡查最大 (秒)"
+              type="number"
+              min="1"
+              max="86400"
+            />
+            <BaseInput
+              v-model.number="localSettings.intervals.friendMin"
+              label="好友巡查最小 (秒)"
+              type="number"
+              min="1"
+              max="86400"
+            />
+            <BaseInput
+              v-model.number="localSettings.intervals.friendMax"
+              label="好友巡查最大 (秒)"
+              type="number"
+              min="1"
+              max="86400"
+            />
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 dark:border-gray-700">
+            <div class="flex items-center gap-2">
+              <BaseSwitch
+                v-model="localSettings.friendBlockLevel.enabled"
+                label="启用屏蔽好友等级"
+              />
+              <BaseInput
+                v-model="localSettings.friendBlockLevel.Level"
+                type="number"
+                min="1"
+                max="999"
+                step="1"
+                required
+                class="w-24"
+                :disabled="!localSettings.friendBlockLevel.enabled"
+              />
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap items-center gap-4 border-t pt-3 dark:border-gray-700">
+            <BaseSwitch
+              v-model="localSettings.friendQuietHours.enabled"
+              label="启用静默时段"
+            />
+            <div class="flex items-center gap-2">
+              <BaseInput
+                v-model="localSettings.friendQuietHours.start"
+                type="time"
+                class="w-24"
+                :disabled="!localSettings.friendQuietHours.enabled"
+              />
+              <span class="text-gray-500">-</span>
+              <BaseInput
+                v-model="localSettings.friendQuietHours.end"
+                type="time"
+                class="w-24"
+                :disabled="!localSettings.friendQuietHours.enabled"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Auto Control Header -->
@@ -1164,7 +1356,7 @@ async function handleTestOffline() {
         </div>
 
         <!-- Auto Control Content -->
-        <div class="flex-1 p-4 space-y-4">
+        <div class="p-4 space-y-4">
           <!-- Switches Grid -->
           <div class="grid grid-cols-2 gap-3 md:grid-cols-3">
             <BaseSwitch v-model="localSettings.automation.farm" label="自动种植收获" />
@@ -1397,7 +1589,7 @@ async function handleTestOffline() {
         </div>
 
         <!-- Save Button -->
-        <div class="mt-auto flex justify-end border-t bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/50">
+        <div class="flex justify-end border-t bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/50">
           <BaseButton
             variant="primary"
             size="sm"
@@ -1518,45 +1710,46 @@ async function handleTestOffline() {
               v-model="localRuntimeClient.clientVersion"
               label="游戏版本号"
               type="text"
-              placeholder="例如: 1.6.2.18_20260227"
+              placeholder="例如: 1.7.0.6_20260313"
             />
           </div>
 
           <BaseSelect
             v-model="localRuntimeClient.os"
             label="系统 (os)"
-            :options="[{ label: 'iOS', value: 'iOS' }, { label: 'Android', value: 'Android' }]"
+            :options="runtimeOsOptions"
+            @change="handleRuntimeOsChange"
           />
 
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <BaseInput
+            <BaseSelect
               v-model="localRuntimeClient.device_info.sys_software"
               label="系统版本号"
-              type="text"
-              placeholder="例如: iOS 26.2.1"
+              :options="runtimeSystemVersionOptions"
             />
-            <BaseInput
+            <BaseSelect
               v-model="localRuntimeClient.device_info.network"
               label="网络类型"
-              type="text"
-              placeholder="例如: wifi"
+              :options="runtimeNetworkOptions"
             />
           </div>
 
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <BaseInput
+            <BaseSelect
               v-model="localRuntimeClient.device_info.memory"
               label="内存大小（单位MB）"
-              type="text"
-              placeholder="例如: 7672"
+              :options="runtimeMemoryOptions"
             />
-            <BaseInput
+            <BaseSelect
               v-model="localRuntimeClient.device_info.device_id"
               label="设备ID"
-              type="text"
-              placeholder="例如: iPhone X<iPhone18,3>"
+              :options="runtimeDeviceIdOptions"
             />
           </div>
+
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            切换系统后会自动带入一组对应预设参数，其他项目可以从下拉列表中直接选择。
+          </p>
 
           <p class="text-xs text-gray-500 dark:text-gray-400">
             保存后，运行中的账号会自动重连以生效。
