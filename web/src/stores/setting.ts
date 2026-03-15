@@ -49,8 +49,8 @@ export interface IntervalsConfig {
 }
 
 export interface FriendBlockLevelConfig {
-    enabled?: boolean
-    Level?: number
+  enabled?: boolean
+  Level?: number
 }
 
 export interface FriendQuietHoursConfig {
@@ -107,7 +107,7 @@ export interface SettingsState {
   preferredSeedId: number
   bagSeedPriority: number[]
   intervals: IntervalsConfig
-  friendBlockLevel:FriendBlockLevelConfig
+  friendBlockLevel: FriendBlockLevelConfig
   friendQuietHours: FriendQuietHoursConfig
   automation: AutomationConfig
   ui: UIConfig
@@ -143,7 +143,7 @@ export const useSettingStore = defineStore('setting', () => {
     },
     runtimeClient: {
       serverUrl: 'wss://gate-obt.nqf.qq.com/prod/ws',
-      clientVersion: '1.6.2.18_20260227',
+      clientVersion: '1.7.0.6_20260313',
       os: 'iOS',
       device_info: {
         sys_software: 'iOS 26.2.1',
@@ -191,7 +191,7 @@ export const useSettingStore = defineStore('setting', () => {
         }
         settings.value.runtimeClient = d.runtimeClient || {
           serverUrl: 'wss://gate-obt.nqf.qq.com/prod/ws',
-          clientVersion: '1.6.2.18_20260227',
+          clientVersion: '1.7.0.6_20260313',
           os: 'iOS',
           device_info: {
             sys_software: 'iOS 26.2.1',
