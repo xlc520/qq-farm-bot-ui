@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['close', 'saved'])
 
-const activeTab = ref('qr') // qr, manual
+const activeTab = ref('manual') // qr, manual
 const loading = ref(false)
 const qrData = ref<{ image?: string, code: string, qrcode?: string, url?: string } | null>(null)
 const qrStatus = ref('')
@@ -221,19 +221,19 @@ watch(() => props.show, (newVal) => {
     errorMessage.value = ''
     if (props.editData) {
       // Edit mode: Default to QR refresh, load code
-      activeTab.value = 'qr'
+      activeTab.value = 'manual'
       form.name = props.editData.name
       form.code = props.editData.code || ''
       form.platform = props.editData.platform || 'qq'
-      loadQRCode()
+      // loadQRCode()
     }
     else {
       // Add mode: Default to QR
-      activeTab.value = 'qr'
+      activeTab.value = 'manual'
       form.name = ''
       form.code = ''
       form.platform = 'qq'
-      loadQRCode()
+      // loadQRCode()
     }
   }
   else {
